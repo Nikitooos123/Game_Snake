@@ -15,7 +15,10 @@ def exit_menu(text):
 
 def start_menu(text):
     text_menu = text.render('Нажмите на стрелочки чтобы начать игру!', True, (255, 255, 255))
+    text_apple = text.render('Знаками "+" или "-" регулируйте количество яблочек', True, (255, 255, 255))
+    Win.blit(text_apple, (8, 80))
     Win.blit(text_menu, (8, 40))
+
 
 def start():
     you_lose = False
@@ -25,17 +28,15 @@ def start():
     # уровень змейки
     Snake_Level = 0
     # кординаты яблока
-    kord_x = random.randrange(0, 800, 10)
-    kord_y = random.randrange(0, 600, 10)
+    kord_x = [random.randrange(0, 800, 10)]
+    kord_y = [random.randrange(0, 600, 10)]
     # списки для сохранения предыдущих координат змеи
     bkord_x = []
     bkord_y = []
     # сохранение значений для перемещения змеи
     axis_a = 0
     axis_b = 0
-    # проверочное сохранение предыдущего перемещения координат змеи
-    #axis_x = 0
-    #axis_y = 0
+
     while True:
         # табло с уровнем
         text = pygame.font.Font(None, 36)
@@ -46,7 +47,8 @@ def start():
 
         # создание яблока и змейки
         pygame.draw.rect(Win, (13, 185, 1), [MovSnake_X, MovSnake_Y, 10, 10])
-        pygame.draw.rect(Win, (235, 8, 8), [kord_x, kord_y, 10, 10])
+        for i in range(len(kord_x)):
+            pygame.draw.rect(Win, (235, 8, 8), [kord_x[i], kord_y[i], 10, 10])
         pygame.display.update()
 
         while you_lose == True:
@@ -69,6 +71,13 @@ def start():
                 sys.exit()
             # кнопки управления
             if event.type == pygame.KEYDOWN:
+
+                if event.key == pygame.K_EQUALS and len(kord_x) < 11 and axis_a == 0 and axis_b == 0:
+                    kord_x.insert(0, random.randrange(0, 800, 10))
+                    kord_y.insert(0, random.randrange(0, 600, 10))
+                elif event.key == pygame.K_MINUS and len(kord_x) > 1 and axis_a == 0 and axis_b == 0:
+                    kord_x.pop(0)
+                    kord_y.pop(0)
 
                 if event.key == pygame.K_LEFT and axis_a == 0:
                     axis_x = -5
@@ -104,18 +113,20 @@ def start():
         # делаем хвост змеи
         for i in range(1, Snake_Level+1):
             pygame.draw.rect(Win, (13, 185, 1), [bkord_x[i], bkord_y[i], 10, 10])
-            #pygame.draw.rect(Win, (13, 185, 1), [bkord_x[i+1], bkord_y[i+1], 10, 10])
             if bkord_x[i] == MovSnake_X and bkord_y[i] == MovSnake_Y:
                 you_lose = True
 
         if len(bkord_x) > Snake_Level+1:
             bkord_x.pop(-1)
             bkord_y.pop(-1)
-        # новое создаем яблоко
-        if MovSnake_X == kord_x and MovSnake_Y == kord_y:
-            kord_x = random.randrange(0, 800, 10)
-            kord_y = random.randrange(0, 600, 10)
-            Snake_Level += 1
+        # создаем новое яблоко
+        for i in range(len(kord_x)):
+            if MovSnake_X == kord_x[i] and MovSnake_Y == kord_y[i]:
+                kord_x.pop(i)
+                kord_y.pop(i)
+                kord_x.insert(i, random.randrange(0, 600, 10))
+                kord_y.insert(i, random.randrange(0, 600, 10))
+                Snake_Level += 1
 
         # проигрышный сценарий
         if MovSnake_X > 800:
